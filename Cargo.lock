@@ -1419,6 +1419,7 @@ dependencies = [
  "env_logger",
  "image",
  "itertools",
+ "lazy_static",
  "log",
  "rayon",
  "regex",
