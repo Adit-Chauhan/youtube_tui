@@ -176,4 +176,20 @@ impl App {
 
         f.render_stateful_widget(vids, ff, &mut self.titles.state);
     }
+
+    pub(super) fn draw_video<B: Backend>(&mut self, ff: Rect, f: &mut Frame<B>) {
+        let block_maker = |ti: &str| {
+            Block::default()
+                .style(Style::default().fg(White))
+                .borders(Borders::ALL)
+                .title(ti.to_string())
+        };
+        // empty box
+        let dumb = || block_maker("");
+
+        let blob_rec =
+            space_splitter!(HP ff,[Constraint::Percentage(75),Constraint::Percentage(35)]);
+        let vid_comment =
+            space_splitter!(VP blob_rec[0],[Constraint::Percentage(30),Constraint::Percentage(70)]);
+    }
 }

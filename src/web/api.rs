@@ -3,15 +3,7 @@ use std::error::Error;
 
 use crate::config_reader::*;
 use serde_json::Value;
-use std::collections::HashMap;
-use std::sync::Mutex;
 
-lazy_static::lazy_static! {
-    static ref CACHE: Mutex<HashMap<String,String>> = {
-        let mut m = HashMap::new();
-        Mutex::new(m)
-    };
-}
 pub struct YTApi {}
 
 impl YTApi {
@@ -43,11 +35,6 @@ impl YTApi {
         &self,
         channel_id: String,
     ) -> Result<String, Box<dyn Error>> {
-        let mut map = CACHE.lock().unwrap();
-        if map.contains_key(&channel_id) {
-            let t = map.get(&channel_id).unwrap();
-            return Ok(t.to_string());
-        }
         let url = static_format!(
             "https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails&id={}&key={}",
             channel_id,
@@ -58,7 +45,6 @@ impl YTApi {
         let playlist_id = jsn["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
             .as_str()
             .unwrap();
-        map.insert(channel_id, playlist_id.to_string());
         Ok(playlist_id.to_string())
     }
 }
