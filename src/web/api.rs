@@ -25,11 +25,21 @@ impl YTApi {
         }
         Ok(ret)
     }
-    pub fn get_channel_uploads(&self, channel_id: String) -> Result<String, Box<dyn Error>> {
-        let uploads_playlist = self.get_channel_uploads_id(channel_id)?;
-        let url =static_format!("https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId={}&key={}",uploads_playlist ,YT_API_KEY);
-        let resp = reqwest::blocking::get(url)?.text()?;
-        Ok(resp)
+    pub fn get_channel_uploads(
+        &self,
+        channel_id: String,
+        page: Option<&str>,
+    ) -> Result<String, Box<dyn Error>> {
+        if page.is_none() {
+            let uploads_playlist = self.get_channel_uploads_id(channel_id)?;
+            let url =static_format!("https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId={}&key={}",uploads_playlist ,YT_API_KEY);
+            let resp = reqwest::blocking::get(url)?.text()?;
+            Ok(resp)
+        } else {
+            let uploads_playlist = self.get_channel_uploads_id(channel_id)?;
+            let url =static_format!("https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&pageToken={}&playlistId={}&key={}",page.unwrap(),uploads_playlist ,YT_API_KEY);
+            let resp = reqwest::blocking::get(url)?.text()?;
+        }
     }
     pub(super) fn get_channel_uploads_id(
         &self,

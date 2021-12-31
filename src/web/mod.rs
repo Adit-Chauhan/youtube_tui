@@ -34,6 +34,12 @@ pub struct YTChannel {
     pub item_count: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct Comment {
+    author: String,
+    comment: String,
+}
+
 impl Video {
     pub(super) fn new(
         id: String,
@@ -107,7 +113,7 @@ impl YTChannel {
     pub fn get_videos(&self, _full: bool) -> Vec<Video> {
         println!("Grabbing video for {}", self.name);
         let jsn = YTApi::new()
-            .get_channel_uploads(self.id.to_string())
+            .get_channel_uploads(self.id.to_string(), None)
             .unwrap();
         let jsn: Value = serde_json::from_str(&jsn).unwrap();
         let vids = jsn["items"].as_array().unwrap();
