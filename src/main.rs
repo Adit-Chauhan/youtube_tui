@@ -8,7 +8,7 @@ mod ui;
 mod web;
 
 use crate::config_reader::*;
-use crate::web::extra::history;
+use crate::web::extra::{cache, history};
 use crate::web::utils::{
     get_channels, get_home, save_channel_vids, save_channels_initial, update_channels,
 };
@@ -36,6 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             "update" => {
                 update_channels();
                 history::prune_history();
+                cache::prune_cache();
             }
             "init" => {
                 info!("Starting Initilizations");

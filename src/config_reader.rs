@@ -9,6 +9,7 @@ pub struct Config {
     pub cachepath: String,
     pub api_key: String,
     pub channel_id: String,
+    pub cache_size_max: usize,
 }
 
 fn read_config() -> Config {
@@ -30,6 +31,7 @@ pub fn set_configs() {
         YT_COOKIES = string_to_static_str(a.cookie);
         YT_SELF_CHANNEL_NAME = string_to_static_str(a.channel_id);
         CACHE_PATH = string_to_static_str(a.cachepath);
+        CACHE_MAX_SIZE = a.cache_size_max;
     }
 }
 
@@ -37,3 +39,4 @@ pub static mut YT_COOKIES: &'static str = "";
 pub static mut YT_API_KEY: &'static str = "";
 pub static mut YT_SELF_CHANNEL_NAME: &'static str = "";
 pub static mut CACHE_PATH: &'static str = "";
+pub static mut CACHE_MAX_SIZE: usize = 0;

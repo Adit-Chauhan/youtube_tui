@@ -68,3 +68,28 @@ pub mod history {
             .collect::<Vec<_>>();
     }
 }
+
+pub mod cache {
+    use crate::config_reader::{CACHE_MAX_SIZE, CACHE_PATH};
+    use fs_extra::dir;
+    use log::info;
+    use std::fs;
+    pub fn prune_cache() {
+        info!("Checking Cache");
+        let size = dir::get_size(unsafe { CACHE_PATH }).unwrap();
+        let size = size / 1_000_000;
+        info!("Cache Size {} mb", size);
+        if size as usize > unsafe { CACHE_MAX_SIZE } {
+            info!("Deleting Cache");
+            for path in fs::read_dir(unsafe { CACHE_PATH }).unwrap() {
+                let path = path.unwrap().path();
+                let ext = path.extension();
+                if let Some(ext) = ext {
+                    if ext == std::ffi::OsStr::new("jpg") {
+                        fs::remove_file(path).unwrap();
+                    }
+                }
+            }
+        }
+    }
+}

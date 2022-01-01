@@ -8,6 +8,7 @@ use crate::web::api as YTApi;
 use crate::web::yt_video::Video;
 
 use itertools::Itertools;
+use log::error;
 use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -89,11 +90,18 @@ impl YTChannel {
             return vids;
         }
         info!("Grabbing video for {}", self.name);
-        let jsn = YTApi::get_channel_uploads(self.id.to_string(), None).unwrap();
-        let jsn: Value = serde_json::from_str(&jsn).unwrap();
-        let vids = jsn["items"].as_array().unwrap();
-        let vids: Vec<Video> = iter_collect!(vids, get_vid);
-        vids
+        let jsn = YTApi::get_channel_uploads(self.id.to_string(), None).map_err(|e| {
+            error!("Error on grabbing channel uploads for {}", self.name);
+            error!("returning empty vec");
+        });
+        if let Ok(jsn) = jsn {
+            let jsn: Value = serde_json::from_str(&jsn).unwrap();
+            let vids = jsn["items"].as_array().unwrap();
+            let vids: Vec<Video> = iter_collect!(vids, get_vid);
+            vids
+        } else {
+            Vec::new()
+        }
     }
 
     pub fn update_videos(&self) -> bool {
