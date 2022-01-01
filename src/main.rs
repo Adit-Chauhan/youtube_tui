@@ -8,6 +8,7 @@ mod ui;
 mod web;
 
 use crate::config_reader::*;
+use crate::web::extra::history;
 use crate::web::utils::{
     get_channels, get_home, save_channel_vids, save_channels_initial, update_channels,
 };
@@ -31,18 +32,19 @@ fn main() -> Result<(), Box<dyn Error>> {
     set_configs();
     let ar: Vec<String> = std::env::args().collect();
     if ar.len() == 2 {
-        update_channels();
-        return Ok(());
-    }
-    if ar.len() == 3 {
-        info!("Starting Initilizations");
-        let chans = get_channels()?;
-        save_channels_initial(&chans);
-        save_channel_vids();
-        return Ok(());
-    }
-    if ar.len() == 4 {
-        save_channel_vids();
+        match ar[1].as_str() {
+            "update" => {
+                update_channels();
+                history::prune_history();
+            }
+            "init" => {
+                info!("Starting Initilizations");
+                let chans = get_channels()?;
+                save_channels_initial(&chans);
+                save_channel_vids();
+            }
+            _ => {}
+        }
         return Ok(());
     }
     let res = get_home()?;

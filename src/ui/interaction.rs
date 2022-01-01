@@ -1,5 +1,5 @@
 use crate::util_macro::*;
-
+use crate::web::extra::history;
 use std::panic;
 use std::process::Command;
 
@@ -21,7 +21,7 @@ impl App {
 
         match &self.videos {
             Contents::Vid(x) => {
-                self.save_history(&x[idx].title, &x[idx].id, &x[idx].channel);
+                history::save_history(&x[idx].title, &x[idx].id, &x[idx].channel);
                 Command::new("devour")
                     .arg("mpv")
                     .arg(x[idx].clone().get_url())
@@ -73,23 +73,23 @@ impl App {
             // TODO Fix Channel Name and url mixing
             match c {
                 '1' => {
-                    self.save_history(&vids[0].title, &vids[0].id, &vids[0].channel_url);
+                    history::save_history(&vids[0].title, &vids[0].id, &vids[0].channel_url);
                     run_vid(vids[0].clone().get_url())
                 }
                 '2' => {
-                    self.save_history(&vids[1].title, &vids[1].id, &vids[1].channel_url);
+                    history::save_history(&vids[1].title, &vids[1].id, &vids[1].channel_url);
                     run_vid(vids[1].clone().get_url())
                 }
                 '3' => {
-                    self.save_history(&vids[2].title, &vids[2].id, &vids[2].channel_url);
+                    history::save_history(&vids[2].title, &vids[2].id, &vids[2].channel_url);
                     run_vid(vids[2].clone().get_url())
                 }
                 '4' => {
-                    self.save_history(&vids[3].title, &vids[3].id, &vids[3].channel_url);
+                    history::save_history(&vids[3].title, &vids[3].id, &vids[3].channel_url);
                     run_vid(vids[3].clone().get_url())
                 }
                 '5' => {
-                    self.save_history(&vids[4].title, &vids[4].id, &vids[4].channel_url);
+                    history::save_history(&vids[4].title, &vids[4].id, &vids[4].channel_url);
                     run_vid(vids[4].clone().get_url())
                 }
                 _ => {}

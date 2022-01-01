@@ -1,6 +1,7 @@
 use crate::config_reader::*;
 use crate::list::*;
 use crate::util_macro::*;
+use crate::web::extra::history;
 use crate::web::*;
 use crate::web::{yt_channels::YTChannel, yt_video::Video};
 use ueberzug::{Scalers, UeConf, Ueberzug};
@@ -65,24 +66,9 @@ impl App {
             self.titles = StatefulList::with_items(titles);
         } else if self.menu_active == 3 {
             // For History
-            if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {
-                let mut history: Vec<Video> = iter_collect!(into lines,
-                |line| {
-                    if let Ok(l) = line {
-                        let parts = l.split("<>ID<>").collect::<Vec<_>>();
-                        let parts2 = parts[1].split("<>CHAN<>").collect::<Vec<_>>();
-                        Video::new_light(parts[0].to_string(),parts2[0].to_string(),parts2[1].to_string())
-                    } else {
-                        Video::new_light("error".to_string(),"error".to_string(),"error".to_string())
-                    }
-                });
-                let mut vid_titles: Vec<String> =
-                    iter_collect!(history, |v| -> String { v.title.clone() });
-                history.reverse();
-                vid_titles.reverse();
-                self.videos = Contents::Vid(history);
-                self.titles = StatefulList::with_items(vid_titles);
-            }
+            let (history, vid_titles) = history::load_history();
+            self.videos = Contents::Vid(history);
+            self.titles = StatefulList::with_items(vid_titles);
         } else if self.menu_active == 4 {
             let idx = self.titles.state.selected().unwrap_or(0);
             let chan = match &self.videos {
@@ -172,16 +158,6 @@ impl App {
             if x + 2 < videos.len() {
                 let _ = self.return_img_path(x + 2);
             }
-        }
-    }
-
-    pub fn save_history(&self, title: &str, id: &str, chan: &str) {
-        if self.menu_active != 3 {
-            let mut history = fs::OpenOptions::new()
-                .append(true)
-                .open(&static_format!("{}/history.txt", CACHE_PATH))
-                .expect("file");
-            writeln!(history, "{}<>ID<>{}<>CHAN<>{}", title, id, chan);
         }
     }
 }
