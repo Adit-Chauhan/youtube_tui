@@ -1,4 +1,3 @@
-use crate::config_reader::*;
 use crate::util_macro::*;
 
 use std::panic;
@@ -136,12 +135,7 @@ impl App {
 
         let mut paras: Vec<Paragraph> = vec![Paragraph::new(""); 5];
         if let Some(x) = current_title {
-            let chan_vids = &channels[x].load_videos(static_format!(
-                "{}/{}/{}",
-                CACHE_PATH,
-                &channels[x].id,
-                &channels[x].id
-            ));
+            let chan_vids = &channels[x].load_videos();
             for i in 0..5 {
                 if let Some(x) = chan_vids.get(i) {
                     paras[i] = make_para(x.title.clone());

@@ -1,4 +1,3 @@
-use crate::config_reader::*;
 use crate::util_macro::*;
 
 use std::panic;
@@ -70,12 +69,7 @@ impl App {
                 Contents::Chan(x) => x,
                 _ => panic!("Eror"),
             };
-            let vids = chans[idx].load_videos(static_format!(
-                "{}/{}/{}",
-                CACHE_PATH,
-                chans[idx].id,
-                chans[idx].id
-            ));
+            let vids = chans[idx].load_videos();
             // TODO Fix Channel Name and url mixing
             match c {
                 '1' => {

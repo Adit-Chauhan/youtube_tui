@@ -27,6 +27,11 @@ macro_rules! json_file {
         let mut fp = std::fs::File::create($fn).expect("could not create File");
         fp.write(j.as_bytes()).expect("failed to write to file");
     };
+    (read $t:ty,$x:expr) => {
+        let j = fs::read_to_string($x).expect("");
+        let j: $t = serde_json::from_str(&j).expect("");
+        j
+    };
 }
 macro_rules! static_format {
 	($($arg:tt) *) => {

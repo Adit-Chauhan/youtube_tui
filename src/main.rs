@@ -24,6 +24,8 @@ use tui::{
     Terminal,
 };
 
+use log::info;
+
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
     set_configs();
@@ -33,6 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
     if ar.len() == 3 {
+        info!("Starting Initilizations");
         let chans = get_channels()?;
         save_channels_initial(&chans);
         save_channel_vids();
@@ -43,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
     let res = get_home()?;
-    println!("Downloaded and Parsed Video info");
+    info!("Downloaded and Parsed Video info");
     let mut asi = async_stdin();
     let stdout = io::stdout().into_raw_mode().expect("Raw IO");
     let backend = TermionBackend::new(stdout);

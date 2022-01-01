@@ -1,6 +1,6 @@
 use crate::{
     list::*,
-    web::{Video, YTChannel},
+    web::{yt_channels::YTChannel, yt_video::Video},
 };
 use ueberzug::Ueberzug;
 pub mod drawing;

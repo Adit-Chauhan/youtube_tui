@@ -2,7 +2,6 @@ use std::error::Error;
 use std::fs;
 use std::io::Write;
 
-
 use crate::config_reader::*;
 use crate::util_macro::*;
 use itertools::Itertools;
@@ -13,8 +12,9 @@ use reqwest::header;
 
 use serde_json::Value;
 
-use crate::web::api::YTApi;
-use crate::web::{Video, YTChannel};
+use crate::web::api as YTApi;
+use crate::web::{yt_channels::YTChannel, yt_video::Video};
+use log::{debug, info};
 
 pub fn get_recent() -> Result<Vec<Video>, Box<dyn Error>> {
     #[rustfmt::skip]
@@ -99,13 +99,16 @@ fn filter_json(url: &str) -> Result<Value, Box<dyn Error>> {
 }
 
 pub fn get_channels() -> Result<Vec<YTChannel>, Box<dyn Error>> {
-    let api = YTApi::new();
-    let s = api.get_self_subscriptions(50)?;
+    let s = YTApi::get_self_subscriptions(50)?;
     let mut v: Vec<YTChannel> = Vec::new();
 
     for json in s {
         let items = json["items"].as_array().unwrap();
         for item in items {
+            info!(
+                "Collecting Channels {}",
+                vid_travel!(item, "snippet", "title")
+            );
             #[rustfmt::skip]
             v.push(YTChannel::new(
                 vid_travel!(item, "snippet", "title"),
@@ -121,11 +124,12 @@ pub fn get_channels() -> Result<Vec<YTChannel>, Box<dyn Error>> {
 }
 
 pub fn save_channels_initial(channels: &Vec<YTChannel>) {
-    println!("saving Channels");
+    info!("saving Channels");
     let chans_list: Vec<String> = channels
         .par_iter()
         .map(|c| -> String {
-            c.save_channel();
+            info!("Saving {}", c.name);
+            c.save_channel_initial();
             static_format!("{}/{}/{}", CACHE_PATH, c.id, c.id)
         })
         .collect();
@@ -151,43 +155,33 @@ pub fn load_channels() -> Vec<YTChannel> {
 }
 
 pub fn save_channel_vids() {
-    println!("Saving Videos");
+    info!("Saving Videos");
     let chans = load_channels();
-    println!("Loaded Channels");
+    info!("Loaded Channels");
     chans
         .par_iter()
         .map(|c| {
-            c.save_vidoes(static_format!("{}/{}/{}", CACHE_PATH, c.id, c.id));
+            //     c.save_vidoes();
         })
         .collect::<Vec<_>>();
 }
 pub fn update_channels() {
-    println!("updating Channels");
-
+    info!("Updating Channels");
     let chans_list =
         fs::read_to_string(&static_format!("{}/channels.json", CACHE_PATH)).expect("Opened file");
     let chans_list: Vec<String> = serde_json::from_str(&chans_list).unwrap();
     let chans_back = chans_list.clone();
-    println!("Total of {} channels", chans_list.len());
     let mut updated: Vec<String> = chans_list
         .into_par_iter()
         .filter(|c| -> bool {
-            let old = fs::read_to_string(&format!("{}_vids.json", c)).expect("");
-            let old: Vec<Video> = serde_json::from_str(&old).expect("");
             let new = fs::read_to_string(&format!("{}.json", c)).expect("");
             let new: YTChannel = serde_json::from_str(&new).expect("");
-            let new = new.get_videos(true);
-            if new[0].id != old[0].id {
-                json_file!(write & new, &format!("{}_vids.json", c));
-                return true;
-            }
-            false
+            new.update_videos()
         })
         .collect();
-    println!("New Videos from {} channels", updated.len());
+    info!("New Videos from {} channels", updated.len());
     updated.extend(chans_back);
     let new_list: Vec<String> = updated.into_iter().unique().collect();
-    println!("total of {} channels", new_list.len());
     json_file!(
         write & new_list,
         &static_format!("{}/channels.json", CACHE_PATH)

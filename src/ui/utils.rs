@@ -2,6 +2,7 @@ use crate::config_reader::*;
 use crate::list::*;
 use crate::util_macro::*;
 use crate::web::*;
+use crate::web::{yt_channels::YTChannel, yt_video::Video};
 use ueberzug::{Scalers, UeConf, Ueberzug};
 
 use std::fs::{self, File};
@@ -89,7 +90,7 @@ impl App {
                 Contents::Vid(_) => panic!("panic"),
             };
             let chan = &chan[idx];
-            let vids = chan.load_videos(static_format!("{}/{}/{}", CACHE_PATH, &chan.id, &chan.id));
+            let vids = chan.load_videos();
             let vid_titles: Vec<String> = iter_collect!(vids, |v| -> String { v.title.clone() });
             self.videos = Contents::Vid(vids);
             self.titles = StatefulList::with_items(vid_titles);
