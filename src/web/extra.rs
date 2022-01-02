@@ -1,4 +1,5 @@
 pub mod history {
+    use super::read_lines;
     use itertools::Itertools;
     use log::debug;
     use log::info;
@@ -38,14 +39,6 @@ pub mod history {
         }
         (Vec::new(), Vec::new())
     }
-    fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-    where
-        P: AsRef<Path>,
-    {
-        let file = File::open(filename)?;
-        Ok(io::BufReader::new(file).lines())
-    }
-
     pub fn prune_history() {
         info!("Pruning Duplicates from History");
         let (hist, _) = load_history();
@@ -92,4 +85,65 @@ pub mod cache {
             }
         }
     }
+}
+
+pub mod watch_later {
+    use super::read_lines;
+    use itertools::Itertools;
+    use log::debug;
+    use log::info;
+
+    use crate::config_reader::*;
+    use crate::util_macro::*;
+    use crate::web::yt_video::Video;
+    use std::fs;
+    use std::fs::File;
+    use std::io::{self, BufRead, Write};
+    use std::path::Path;
+    use std::process::Command;
+
+    pub fn save_watch(vid: &Video, download: bool) {
+        let mut watch_list = fs::OpenOptions::new()
+            .append(true)
+            .open(&static_format!("{}/watch_list.txt", CACHE_PATH))
+            .expect("file");
+        writeln!(
+            watch_list,
+            "{}<>ID<>{}<>CHAN<>{}",
+            vid.title, vid.id, vid.channel
+        );
+    }
+    pub fn load_watch() -> (Vec<Video>, Vec<String>) {
+        if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {
+            let mut watch_list: Vec<Video> = iter_collect!(into lines,
+            |line| {
+                if let Ok(l) = line {
+                    let parts = l.split("<>ID<>").collect::<Vec<_>>();
+                    let parts2 = parts[1].split("<>CHAN<>").collect::<Vec<_>>();
+                    Video::new_light(parts[0].to_string(),parts2[0].to_string(),parts2[1].to_string())
+                } else {
+                    Video::new_light("error".to_string(),"error".to_string(),"error".to_string())
+                }
+            });
+            let mut vid_titles: Vec<String> =
+                iter_collect!(watch_list, |v| -> String { v.title.clone() });
+            watch_list.reverse();
+            vid_titles.reverse();
+            return (watch_list, vid_titles);
+        }
+        (Vec::new(), Vec::new())
+    }
+    pub fn run_watch_later(vid: &Video) {}
+}
+
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
+
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where
+    P: AsRef<Path>,
+{
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }

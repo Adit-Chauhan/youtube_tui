@@ -4,6 +4,7 @@ mod config_reader;
 mod list;
 mod util_macro;
 
+mod commands;
 mod ui;
 mod web;
 
