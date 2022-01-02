@@ -71,10 +71,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     break 'outer;
                 }
                 Key::Down => {
-                    app.on_move(true);
+                    app.on_down();
                 }
                 Key::Up => {
-                    app.on_move(false);
+                    app.on_up();
                 }
                 Key::Left => app.on_left(),
                 Key::Right => app.on_right(),
