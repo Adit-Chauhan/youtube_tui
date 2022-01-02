@@ -30,7 +30,7 @@ use super::{App, Contents};
 impl App {
     pub(super) fn draw_vids<B: Backend>(&mut self, ff: Rect, f: &mut Frame<B>, heading: &str) {
         let current_title = self.titles.state.selected();
-        let videos = match &self.videos {
+        let videos = match &self.content {
             Contents::Vid(x) => x,
             Contents::Chan(_) => panic!("This should not have been called"),
         };
@@ -113,7 +113,7 @@ impl App {
             space_splitter!(HP vs,[Constraint::Percentage(80), Constraint::Percentage(20)])
         });
 
-        let channels = match &self.videos {
+        let channels = match &self.content {
             Contents::Chan(x) => x,
             Contents::Vid(_) => panic!("This should not have been called"),
         };
@@ -154,7 +154,7 @@ impl App {
     }
 
     pub(super) fn draw_history<B: Backend>(&mut self, ff: Rect, f: &mut Frame<B>) {
-        let videos = match &self.videos {
+        let videos = match &self.content {
             Contents::Vid(v) => v,
             Contents::Chan(_) => panic!("unreachable Code"),
         };

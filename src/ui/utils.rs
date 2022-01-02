@@ -22,20 +22,20 @@ use tui::{
     Frame,
 };
 
-use super::{App, Contents};
+use super::{App, Contents, Menu};
 
 impl App {
-    pub fn new(videos: Contents) -> App {
-        let vid_titles: Vec<String> = match &videos {
+    pub fn new(content: Contents) -> App {
+        let vid_titles: Vec<String> = match &content {
             Contents::Vid(vi) => vi.iter().map(|v| -> String { v.title.clone() }).collect(),
             Contents::Chan(ch) => ch.iter().map(|c| -> String { c.name.clone() }).collect(),
         };
         App {
             titles: StatefulList::with_items(vid_titles),
-            videos: videos,
+            content,
             ueberzug: Ueberzug::new(),
             menu_titles: vec!["Home", "Recent", "Channels", "History"],
-            menu_active: 0,
+            menu_active: Menu::Home,
         }
     }
 
@@ -48,43 +48,46 @@ impl App {
         self.ueberzug.clear("4");
         self.ueberzug.clear("a");
 
-        if self.menu_active < 2 {
-            // for Home and Recent
-            let videos = match self.menu_active {
-                1 => utils::get_recent().expect("videos"),
-                0 => utils::get_home().expect("videos"),
-                _ => panic!("How is this possible"),
-            };
-            let vid_titles: Vec<String> = iter_collect!(videos, |v| -> String { v.title.clone() });
-            self.videos = Contents::Vid(videos);
-            self.titles = StatefulList::with_items(vid_titles);
-        } else if self.menu_active == 2 {
-            // For channel List
-            let channels = utils::load_channels();
-            let titles: Vec<String> = iter_collect!(channels, |c| -> String { c.name.clone() });
-            self.videos = Contents::Chan(channels);
-            self.titles = StatefulList::with_items(titles);
-        } else if self.menu_active == 3 {
-            // For History
-            let (history, vid_titles) = history::load_history();
-            self.videos = Contents::Vid(history);
-            self.titles = StatefulList::with_items(vid_titles);
-        } else if self.menu_active == 4 {
-            let idx = self.titles.state.selected().unwrap_or(0);
-            let chan = match &self.videos {
-                Contents::Chan(c) => c,
-                Contents::Vid(_) => panic!("panic"),
-            };
-            let chan = &chan[idx];
-            let vids = chan.load_videos();
-            let vid_titles: Vec<String> = iter_collect!(vids, |v| -> String { v.title.clone() });
-            self.videos = Contents::Vid(vids);
-            self.titles = StatefulList::with_items(vid_titles);
-        }
+        let (content, titles) = match self.menu_active {
+            Menu::Home => {
+                let v = utils::get_home().expect("video");
+                let t: Vec<String> = iter_collect!(v, |vv| -> String { vv.title.clone() });
+                (Contents::Vid(v), StatefulList::with_items(t))
+            }
+            Menu::Recent => {
+                let v = utils::get_recent().expect("video");
+                let t: Vec<String> = iter_collect!(v, |vv| -> String { vv.title.clone() });
+                (Contents::Vid(v), StatefulList::with_items(t))
+            }
+            Menu::Channels => {
+                let c = utils::load_channels();
+                let t = iter_collect!(c, |cc| -> String { cc.name.clone() });
+                (Contents::Chan(c), StatefulList::with_items(t))
+            }
+            Menu::ChannelVideos => {
+                let idx = self.titles.state.selected().unwrap_or(0);
+                if let Contents::Chan(c) = &self.content {
+                    let c = &c[idx];
+                    let v = c.load_videos();
+                    let t = iter_collect!(v, |vv| -> String { vv.title.clone() });
+                    (Contents::Vid(v), StatefulList::with_items(t))
+                } else {
+                    panic!("")
+                }
+            }
+            Menu::History => {
+                let h = history::load_history();
+                (Contents::Vid(h.0), StatefulList::with_items(h.1))
+            }
+
+            Menu::WatchList => todo!(),
+        };
+        self.content = content;
+        self.titles = titles;
     }
 
     pub fn return_img_path(&self, x: usize) -> String {
-        if let Contents::Vid(videos) = &self.videos {
+        if let Contents::Vid(videos) = &self.content {
             let filename = static_format!("{}/{}.jpg", CACHE_PATH, videos[x].id);
             if std::path::Path::new(&filename).exists() {
                 return filename;
@@ -151,7 +154,7 @@ impl App {
         });
 
         // Queue Next two images to download if present
-        if let Contents::Vid(videos) = &self.videos {
+        if let Contents::Vid(videos) = &self.content {
             if x + 1 < videos.len() {
                 let _ = self.return_img_path(x + 1);
             }
@@ -184,12 +187,12 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .split(f.size());
 
     match app.menu_active {
-        0 => app.draw_vids(bunks[1], f, "Home "),
-        1 => app.draw_vids(bunks[1], f, "Recents "),
-        2 => app.draw_channel(bunks[1], f),
-        3 => app.draw_history(bunks[1], f),
-        4 => app.draw_vids(bunks[1], f, "Channel "),
-        _ => panic!("panic"),
+        Menu::Home => app.draw_vids(bunks[1], f, "Home "),
+        Menu::Recent => app.draw_vids(bunks[1], f, "Recents "),
+        Menu::Channels => app.draw_channel(bunks[1], f),
+        Menu::History => app.draw_history(bunks[1], f),
+        Menu::ChannelVideos => app.draw_vids(bunks[1], f, "Channel "),
+        Menu::WatchList => todo!(),
     }
 
     let menu = iter_collect!(app.menu_titles, |t| -> Spans {
@@ -206,7 +209,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     });
 
     let tabs = Tabs::new(menu)
-        .select(app.menu_active)
+        .select(app.menu_active.as_num())
         .block(Block::default().title("Menu").borders(Borders::ALL))
         .style(Style::default().fg(White))
         .highlight_style(Style::default().fg(Yellow))

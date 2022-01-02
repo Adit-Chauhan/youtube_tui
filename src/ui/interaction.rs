@@ -3,7 +3,7 @@ use crate::web::extra::history;
 use std::panic;
 
 const MENU_COUNT: usize = 4;
-use super::{App, Contents};
+use super::{App, Contents, Menu};
 impl App {
     pub fn on_up(&mut self) {
         self.titles.previous();
@@ -14,55 +14,36 @@ impl App {
     pub fn on_right(&mut self) {}
     pub fn on_left(&mut self) {}
     pub fn on_tab(&mut self) {
-        self.menu_active = (self.menu_active + 1) % MENU_COUNT;
+        self.menu_active = self.menu_active.next();
         self.refresh();
     }
     pub fn on_enter(&mut self) {
         let idx = &self.titles.state;
         let idx = idx.selected().unwrap_or(0);
 
-        match &self.videos {
+        match &self.content {
             Contents::Vid(x) => {
                 history::save_history(&x[idx].title, &x[idx].id, &x[idx].channel);
                 commands::play_vid(&x[idx].clone().get_url());
             }
             Contents::Chan(_x) => {
-                self.menu_active = 4;
+                self.menu_active = Menu::ChannelVideos;
                 self.refresh();
             }
         };
     }
     pub fn on_char(&mut self, c: char) {
-        match c {
-            'h' => {
-                self.menu_active = 0;
-                self.refresh();
-                return;
-            }
-            'r' => {
-                self.menu_active = 1;
-                self.refresh();
-                return;
-            }
-            'c' => {
-                self.menu_active = 2;
-                self.refresh();
-                return;
-            }
-            'p' => {
-                self.menu_active = 3;
-                self.refresh();
-                return;
-            }
-            _ => {}
+        if let Some(m) = Menu::get(c) {
+            self.menu_active = m;
+            self.refresh();
+            return;
         }
-
         let idx = self.titles.state.selected().unwrap_or(0);
-        match &self.videos {
+        match &self.content {
             Contents::Vid(vids) => {
                 if c == 'y' {
                     let idx = self.titles.state.selected().unwrap_or(0);
-                    let vids = match &self.videos {
+                    let vids = match &self.content {
                         Contents::Vid(v) => v,
                         Contents::Chan(_) => panic!(""),
                     };
