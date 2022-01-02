@@ -96,10 +96,8 @@ impl App {
                 // I am gonna keep this even though it may not be needed
                 thread::spawn(|| {
                     download_thumb_idx(filename, url, false);
-                    // Supress the panic Prints keeping terminal sane
-                    panic::set_hook(Box::new(|_| {}));
-                    // kill the child when it has served it's purpose
-                    panic!("Done");
+                    // kill the child when it has served it's purpose but dont print anything
+                    //                   panic!("SILENT");
                 });
                 return static_format!("{}/loadingPath.png", CACHE_PATH);
             }
@@ -116,10 +114,6 @@ impl App {
             // I am gonna keep this even though it may not be needed
             thread::spawn(|| {
                 download_thumb_idx(filename, url, false);
-                // Supress the panic Prints keeping terminal sane
-                panic::set_hook(Box::new(|_| {}));
-                // kill the child when it has served it's purpose
-                panic!("Done");
             });
             return static_format!("{}/loadingPath.png", CACHE_PATH);
         }

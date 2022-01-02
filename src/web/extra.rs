@@ -8,16 +8,16 @@ pub mod history {
     use crate::util_macro::*;
     use crate::web::yt_video::Video;
     use std::fs;
-    use std::fs::File;
-    use std::io::{self, BufRead, Write};
-    use std::path::Path;
+
+    use std::io::Write;
 
     pub fn save_history(title: &str, id: &str, chan: &str) {
         let mut history = fs::OpenOptions::new()
             .append(true)
             .open(&static_format!("{}/history.txt", CACHE_PATH))
             .expect("file");
-        writeln!(history, "{}<>ID<>{}<>CHAN<>{}", title, id, chan);
+        writeln!(history, "{}<>ID<>{}<>CHAN<>{}", title, id, chan)
+            .expect("Failed to write to history");
     }
     pub fn load_history() -> (Vec<Video>, Vec<String>) {
         if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {
@@ -102,16 +102,13 @@ pub mod watch_later {
     use std::path::Path;
     use std::process::Command;
 
-    pub fn save_watch(vid: &Video, download: bool) {
+    pub fn save_watch(title: &str, id: &str, chan: &str) {
         let mut watch_list = fs::OpenOptions::new()
             .append(true)
             .open(&static_format!("{}/watch_list.txt", CACHE_PATH))
             .expect("file");
-        writeln!(
-            watch_list,
-            "{}<>ID<>{}<>CHAN<>{}",
-            vid.title, vid.id, vid.channel
-        );
+        writeln!(watch_list, "{}<>ID<>{}<>CHAN<>{}", title, id, chan)
+            .expect("Failed to write to file");
     }
     pub fn load_watch() -> (Vec<Video>, Vec<String>) {
         if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {

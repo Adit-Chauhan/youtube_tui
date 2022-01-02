@@ -1,5 +1,6 @@
 use crate::commands;
 use crate::web::extra::history;
+use crate::web::extra::watch_later;
 use std::panic;
 
 const MENU_COUNT: usize = 4;
@@ -41,13 +42,13 @@ impl App {
         let idx = self.titles.state.selected().unwrap_or(0);
         match &self.content {
             Contents::Vid(vids) => {
+                let idx = self.titles.state.selected().unwrap_or(0);
                 if c == 'y' {
-                    let idx = self.titles.state.selected().unwrap_or(0);
-                    let vids = match &self.content {
-                        Contents::Vid(v) => v,
-                        Contents::Chan(_) => panic!(""),
-                    };
                     commands::open_in_br(&vids[idx].clone().get_url());
+                    return;
+                }
+                if c == 'w' {
+                    watch_later::save_watch(&vids[idx].title, &vids[idx].id, &vids[idx].channel);
                     return;
                 }
             }
@@ -58,7 +59,6 @@ impl App {
                     return;
                 }
                 let vids = chans[idx].load_videos();
-                // TODO Fix Channel Name and url mixing
                 match c {
                     '1' => {
                         history::save_history(&vids[0].title, &vids[0].id, &vids[0].channel_url);
