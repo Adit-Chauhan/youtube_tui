@@ -20,6 +20,7 @@ pub struct App {
     pub menu_active: Menu,
 }
 
+#[derive(Clone)]
 pub enum Menu {
     Home,
     Recent,
@@ -55,6 +56,24 @@ impl Menu {
             Menu::History => 3,
             Menu::ChannelVideos => 5,
             Menu::WatchList => 4,
+        }
+    }
+    pub fn from(s: String) -> Self {
+        let s = s.to_lowercase();
+        match s.as_str() {
+            "home" => Menu::Home,
+            "recent" => Menu::Recent,
+            "recents" => Menu::Recent,
+            "channel" => Menu::Channels,
+            "channels" => Menu::Channels,
+            "watch later" => Menu::WatchList,
+            "watch list" => Menu::WatchList,
+            "watch" => Menu::WatchList,
+            "later" => Menu::WatchList,
+            // Lol why would you want this
+            "history" => Menu::History,
+            // Default to home
+            _ => panic!("Incorrect Value for start at"),
         }
     }
 }

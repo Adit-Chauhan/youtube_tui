@@ -3,16 +3,15 @@ mod list;
 mod util_macro;
 
 mod commands;
+mod friendly_panic;
 mod ui;
 mod web;
 
 use crate::config_reader::*;
+use crate::friendly_panic::set_hooks as sh;
+use crate::ui::{App, Menu};
 use crate::web::extra::{cache, history};
-use crate::web::utils::{
-    get_channels, get_home, save_channel_vids, save_channels_initial, update_channels,
-};
-
-use crate::ui::{App, Contents, Menu};
+use crate::web::utils::{get_channels, save_channel_vids, save_channels_initial, update_channels};
 
 use std::error::Error;
 use std::io::{self, Read};
@@ -26,12 +25,11 @@ use tui::{
 };
 
 use log::info;
-
 lazy_static::lazy_static! {
     pub static ref RUNNING: Mutex<usize>  = Mutex::new(0);
 }
-
 fn main() -> Result<(), Box<dyn Error>> {
+    sh();
     env_logger::init();
     set_configs();
     let ar: Vec<String> = std::env::args().collect();
@@ -55,21 +53,19 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut asi = async_stdin();
     let stdout = io::stdout().into_raw_mode().expect("Raw IO");
     let backend = TermionBackend::new(stdout);
-    let mut terminal = Terminal::new(backend).expect("Terminal");
-    let mut app = App::new_from_menu(Menu::Channels);
+    let mut terminal = Terminal::new(backend)?;
+    let mut app = App::new_from_menu(unsafe { START_AT.clone() });
     app.refresh();
     terminal.clear()?;
     'outer: loop {
-        terminal
-            .draw(|f| crate::ui::utils::draw(f, &mut app))
-            .expect("naj");
+        terminal.draw(|f| crate::ui::utils::draw(f, &mut app))?;
 
         for k in asi.by_ref().keys() {
             match k.unwrap() {
                 Key::Char('q') => {
                     // Clear the terminal before exit so as not to leave
                     // a mess.
-                    terminal.clear().expect("m");
+                    terminal.clear()?;
                     break 'outer;
                 }
                 Key::Down => {
@@ -82,15 +78,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Key::Right => app.on_right(),
                 Key::Char('\t') => {
                     app.ueberzug.clear("a");
-                    terminal
-                        .draw(|f| {
-                            let para = Paragraph::new("Loading")
-                                .style(tui::style::Style::default().fg(White))
-                                .alignment(tui::layout::Alignment::Center)
-                                .block(Block::default().borders(Borders::ALL));
-                            f.render_widget(para, f.size());
-                        })
-                        .expect("Failed to draw loading");
+                    terminal.draw(|f| {
+                        let para = Paragraph::new("Loading")
+                            .style(tui::style::Style::default().fg(White))
+                            .alignment(tui::layout::Alignment::Center)
+                            .block(Block::default().borders(Borders::ALL));
+                        f.render_widget(para, f.size());
+                    })?;
                     app.on_tab();
                 }
                 Key::Char('\n') => app.on_enter(),

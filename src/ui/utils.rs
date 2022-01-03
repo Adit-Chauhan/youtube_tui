@@ -23,7 +23,9 @@ use tui::{
 use super::{App, Contents, Menu};
 
 impl App {
+    #[allow(dead_code)]
     pub fn new(content: Contents) -> App {
+        // Depreciated Kept in case i may need it later
         let vid_titles: Vec<String> = match &content {
             Contents::Vid(vi) => vi.iter().map(|v| -> String { v.title.clone() }).collect(),
             Contents::Chan(ch) => ch.iter().map(|c| -> String { c.name.clone() }).collect(),

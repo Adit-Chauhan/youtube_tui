@@ -3,7 +3,6 @@ use std::error::Error;
 
 use crate::config_reader::*;
 use serde_json::Value;
-
 pub fn get_self_subscriptions(results: u8) -> Result<Vec<Value>, Box<dyn Error>> {
     let url =static_format!("https://youtube.googleapis.com/youtube/v3/subscriptions?part=snippet%2CcontentDetails&channelId={}&maxResults={}&key={}&order=unread",YT_SELF_CHANNEL_NAME,results,YT_API_KEY);
     let resp = reqwest::blocking::get(url)?.text()?;

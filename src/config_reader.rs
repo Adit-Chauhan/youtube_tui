@@ -1,3 +1,4 @@
+use crate::Menu;
 use log::info;
 use serde::Deserialize;
 use std::env;
@@ -13,6 +14,7 @@ struct Config {
     cache_size_max: Option<usize>,
     video_dir: Option<String>,
     permapath: Option<String>,
+    start_at: Option<String>,
 }
 
 fn read_config() -> Config {
@@ -47,6 +49,7 @@ pub fn set_configs() {
             "{}/.local/share/yt/",
             home.as_ref().expect("HOME Variable not set")
         )));
+        START_AT = Menu::from(a.start_at.unwrap_or("home".to_string()));
         info!("API = {}", YT_API_KEY);
         info!("COOKIES = {}", YT_COOKIES);
         info!("CHANNEL = {}", YT_SELF_CHANNEL_NAME);
@@ -64,3 +67,4 @@ pub static mut CACHE_PATH: &'static str = "";
 pub static mut CACHE_MAX_SIZE: usize = 0;
 pub static mut CACHE_VIDEO_DIR: &'static str = "";
 pub static mut PERMA: &'static str = "";
+pub static mut START_AT: Menu = Menu::Home;

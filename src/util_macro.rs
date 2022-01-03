@@ -25,7 +25,7 @@ macro_rules! json_file {
     (write $x:expr,$fn:expr) => {
         let j = serde_json::to_string($x).expect("Coudnot serialize");
         let mut fp = std::fs::File::create($fn).expect("could not create File");
-        fp.write(j.as_bytes()).expect("failed to write to file");
+        fp.write(j.as_bytes()).expect("json err");
     };
     (read $t:ty,$x:expr) => {
         let j = fs::read_to_string($x).expect("");
@@ -40,7 +40,16 @@ macro_rules! static_format {
         }
 	};
 }
+macro_rules! errmap {
+    ($x:expr,$fall:expr) => {
+        match $x {
+            Ok(y) => y,
+            Err(_e) => $fall,
+        }
+    };
+}
 
+pub(crate) use errmap;
 pub(crate) use iter_collect;
 pub(crate) use json_file;
 pub(crate) use json_travel;
