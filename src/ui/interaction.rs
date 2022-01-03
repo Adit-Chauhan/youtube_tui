@@ -51,6 +51,10 @@ impl App {
                     watch_later::save_watch(&vids[idx].title, &vids[idx].id, &vids[idx].channel);
                     return;
                 }
+                if c == 'W' {
+                    watch_later::save_watch(&vids[idx].title, &vids[idx].id, &vids[idx].channel);
+                    commands::yt_dl(&vids[idx].clone().get_url());
+                }
             }
             Contents::Chan(chans) => {
                 if c == 'y' {

@@ -130,18 +130,18 @@ pub fn save_channels_initial(channels: &Vec<YTChannel>) {
         .map(|c| -> String {
             info!("Saving {}", c.name);
             c.save_channel_initial();
-            static_format!("{}/{}/{}", CACHE_PATH, c.id, c.id)
+            static_format!("{}/{}/{}", PERMA, c.id, c.id)
         })
         .collect();
     json_file!(
         write & chans_list,
-        &static_format!("{}/channels.json", CACHE_PATH)
+        &static_format!("{}/channels.json", PERMA)
     );
 }
 
 pub fn load_channels() -> Vec<YTChannel> {
     let chans_list =
-        fs::read_to_string(&static_format!("{}/channels.json", CACHE_PATH)).expect("Opened file");
+        fs::read_to_string(&static_format!("{}/channels.json", PERMA)).expect("Opened file");
     let chans_list: Vec<String> = serde_json::from_str(&chans_list).unwrap();
     let channels: Vec<YTChannel> = chans_list
         .into_iter()
@@ -168,7 +168,7 @@ pub fn save_channel_vids() {
 pub fn update_channels() {
     info!("Updating Channels");
     let chans_list =
-        fs::read_to_string(&static_format!("{}/channels.json", CACHE_PATH)).expect("Opened file");
+        fs::read_to_string(&static_format!("{}/channels.json", PERMA)).expect("Opened file");
     let chans_list: Vec<String> = serde_json::from_str(&chans_list).unwrap();
     let chans_back = chans_list.clone();
     let mut updated: Vec<String> = chans_list
@@ -182,8 +182,5 @@ pub fn update_channels() {
     info!("New Videos from {} channels", updated.len());
     updated.extend(chans_back);
     let new_list: Vec<String> = updated.into_iter().unique().collect();
-    json_file!(
-        write & new_list,
-        &static_format!("{}/channels.json", CACHE_PATH)
-    );
+    json_file!(write & new_list, &static_format!("{}/channels.json", PERMA));
 }

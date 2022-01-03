@@ -14,13 +14,13 @@ pub mod history {
     pub fn save_history(title: &str, id: &str, chan: &str) {
         let mut history = fs::OpenOptions::new()
             .append(true)
-            .open(&static_format!("{}/history.txt", CACHE_PATH))
+            .open(&static_format!("{}/history.txt", PERMA))
             .expect("file");
         writeln!(history, "{}<>ID<>{}<>CHAN<>{}", title, id, chan)
             .expect("Failed to write to history");
     }
     pub fn load_history() -> (Vec<Video>, Vec<String>) {
-        if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {
+        if let Ok(lines) = read_lines(static_format!("{}/history.txt", PERMA)) {
             let mut history: Vec<Video> = iter_collect!(into lines,
             |line| {
                 if let Ok(l) = line {
@@ -49,7 +49,7 @@ pub mod history {
     fn save_history_bulk(hist: &Vec<&Video>) {
         debug!("Saving History File");
         let mut hist_file =
-            fs::File::create(&static_format!("{}/history.txt", CACHE_PATH)).expect("File");
+            fs::File::create(&static_format!("{}/history.txt", PERMA)).expect("File");
         hist.into_iter()
             .map(|entry| {
                 writeln!(
@@ -105,13 +105,13 @@ pub mod watch_later {
     pub fn save_watch(title: &str, id: &str, chan: &str) {
         let mut watch_list = fs::OpenOptions::new()
             .append(true)
-            .open(&static_format!("{}/watch_list.txt", CACHE_PATH))
+            .open(&static_format!("{}/watch_list.txt", PERMA))
             .expect("file");
         writeln!(watch_list, "{}<>ID<>{}<>CHAN<>{}", title, id, chan)
             .expect("Failed to write to file");
     }
     pub fn load_watch() -> (Vec<Video>, Vec<String>) {
-        if let Ok(lines) = read_lines(static_format!("{}/history.txt", CACHE_PATH)) {
+        if let Ok(lines) = read_lines(static_format!("{}/watch_list.txt", PERMA)) {
             let mut watch_list: Vec<Video> = iter_collect!(into lines,
             |line| {
                 if let Ok(l) = line {
@@ -130,7 +130,6 @@ pub mod watch_later {
         }
         (Vec::new(), Vec::new())
     }
-    pub fn run_watch_later(vid: &Video) {}
 }
 
 use std::fs::File;

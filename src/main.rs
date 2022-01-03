@@ -1,5 +1,3 @@
-#![feature(generators, generator_trait)]
-
 mod config_reader;
 mod list;
 mod util_macro;
@@ -18,6 +16,7 @@ use crate::ui::{App, Contents};
 
 use std::error::Error;
 use std::io::{self, Read};
+use std::sync::Mutex;
 use termion::{async_stdin, event::Key, input::TermRead, raw::IntoRawMode};
 use tui::style::Color::White;
 use tui::{
@@ -27,6 +26,10 @@ use tui::{
 };
 
 use log::info;
+
+lazy_static::lazy_static! {
+    pub static ref RUNNING: Mutex<usize>  = Mutex::new(0);
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();

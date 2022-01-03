@@ -4,12 +4,14 @@ use serde::Deserialize;
 use toml;
 
 #[derive(Deserialize, Debug)]
-pub struct Config {
-    pub cookie: String,
-    pub cachepath: String,
-    pub api_key: String,
-    pub channel_id: String,
-    pub cache_size_max: usize,
+struct Config {
+    cookie: String,
+    cachepath: String,
+    api_key: String,
+    channel_id: String,
+    cache_size_max: usize,
+    video_dir: String,
+    permapath: String,
 }
 
 fn read_config() -> Config {
@@ -32,6 +34,8 @@ pub fn set_configs() {
         YT_SELF_CHANNEL_NAME = string_to_static_str(a.channel_id);
         CACHE_PATH = string_to_static_str(a.cachepath);
         CACHE_MAX_SIZE = a.cache_size_max;
+        CACHE_VIDEO_DIR = string_to_static_str(a.video_dir);
+        PERMA = string_to_static_str(a.permapath);
     }
 }
 
@@ -40,3 +44,5 @@ pub static mut YT_API_KEY: &'static str = "";
 pub static mut YT_SELF_CHANNEL_NAME: &'static str = "";
 pub static mut CACHE_PATH: &'static str = "";
 pub static mut CACHE_MAX_SIZE: usize = 0;
+pub static mut CACHE_VIDEO_DIR: &'static str = "";
+pub static mut PERMA: &'static str = "";

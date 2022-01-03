@@ -2,11 +2,11 @@ use crate::config_reader::*;
 use crate::list::*;
 use crate::util_macro::*;
 use crate::web::extra::history;
+use crate::web::yt_video::Video;
 use crate::web::*;
-use crate::web::{yt_channels::YTChannel, yt_video::Video};
 use ueberzug::{Scalers, UeConf, Ueberzug};
 
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::panic;
 use std::path::Path;
@@ -99,7 +99,7 @@ impl App {
                     // kill the child when it has served it's purpose but dont print anything
                     //                   panic!("SILENT");
                 });
-                return static_format!("{}/loadingPath.png", CACHE_PATH);
+                return static_format!("{}/loadingPath.png", PERMA);
             }
         }
         "".to_string()
@@ -115,7 +115,7 @@ impl App {
             thread::spawn(|| {
                 download_thumb_idx(filename, url, false);
             });
-            return static_format!("{}/loadingPath.png", CACHE_PATH);
+            return static_format!("{}/loadingPath.png", PERMA);
         }
     }
 

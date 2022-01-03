@@ -7,7 +7,6 @@ use crate::util_macro::*;
 use crate::web::api as YTApi;
 use crate::web::yt_video::Video;
 
-use itertools::Itertools;
 use log::error;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -43,8 +42,8 @@ impl YTChannel {
         }
     }
     pub(super) fn save_channel(&self) {
-        let foldername = &static_format!("{}/{}", CACHE_PATH, self.id);
-        let filename = &static_format!("{}/{}/{}.json", CACHE_PATH, self.id, self.id);
+        let foldername = &static_format!("{}/{}", PERMA, self.id);
+        let filename = &static_format!("{}/{}/{}.json", PERMA, self.id, self.id);
         if !Path::new(foldername).is_dir() {
             fs::create_dir_all(foldername).expect("couldnot create folder");
         }
@@ -75,7 +74,7 @@ impl YTChannel {
             let mut vids = Vec::<Video>::new();
             let mut token = None;
             loop {
-                info!("Using Page Token {:#?} for channel {} ", token, self.name);
+                info!("Using Page Token {:?} for channel {} ", token, self.name);
                 let jsn = YTApi::get_channel_uploads(self.id.to_string(), token).unwrap();
                 let jsn: Value = serde_json::from_str(&jsn).unwrap();
                 let v = jsn["items"].as_array().unwrap();
@@ -120,13 +119,13 @@ impl YTChannel {
     pub fn save_vidoes(&self, vids: &Vec<Video>) {
         json_file!(
             write vids,
-            &static_format!("{}/{}/{}_vids.json", CACHE_PATH, self.id, self.id)
+            &static_format!("{}/{}/{}_vids.json", PERMA, self.id, self.id)
         );
     }
     pub fn load_videos(&self) -> Vec<Video> {
         let json = fs::read_to_string(&static_format!(
             "{}/{}/{}_vids.json",
-            CACHE_PATH,
+            PERMA,
             self.id,
             self.id
         ))
