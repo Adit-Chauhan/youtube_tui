@@ -53,8 +53,8 @@ impl Menu {
             Menu::Recent => 1,
             Menu::Channels => 2,
             Menu::History => 3,
-            Menu::ChannelVideos => 4,
-            Menu::WatchList => 5,
+            Menu::ChannelVideos => 5,
+            Menu::WatchList => 4,
         }
     }
 }

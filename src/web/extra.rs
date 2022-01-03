@@ -50,13 +50,15 @@ pub mod history {
         debug!("Saving History File");
         let mut hist_file =
             fs::File::create(&static_format!("{}/history.txt", PERMA)).expect("File");
-        hist.into_iter()
+        let _ = hist
+            .into_iter()
             .map(|entry| {
                 writeln!(
                     hist_file,
                     "{}<>ID<>{}<>CHAN<>{}",
                     entry.title, entry.id, entry.channel
-                );
+                )
+                .expect("Failed to write pruned history");
             })
             .collect::<Vec<_>>();
     }
@@ -89,19 +91,12 @@ pub mod cache {
 
 pub mod watch_later {
     use super::read_lines;
-    use itertools::Itertools;
-    use log::debug;
-    use log::info;
-
     use crate::config_reader::*;
     use crate::util_macro::*;
     use crate::web::yt_video::Video;
-    use std::fs;
-    use std::fs::File;
-    use std::io::{self, BufRead, Write};
-    use std::path::Path;
-    use std::process::Command;
 
+    use std::fs;
+    use std::io::Write;
     pub fn save_watch(title: &str, id: &str, chan: &str) {
         let mut watch_list = fs::OpenOptions::new()
             .append(true)
@@ -129,6 +124,21 @@ pub mod watch_later {
             return (watch_list, vid_titles);
         }
         (Vec::new(), Vec::new())
+    }
+    fn save_watch_bulk(hist: &Vec<&Video>) {
+        let mut hist_file =
+            fs::File::create(&static_format!("{}/watch_list.txt", PERMA)).expect("File");
+        let _ = hist
+            .into_iter()
+            .map(|entry| {
+                writeln!(
+                    hist_file,
+                    "{}<>ID<>{}<>CHAN<>{}",
+                    entry.title, entry.id, entry.channel
+                )
+                .expect("Failed to write pruned history");
+            })
+            .collect::<Vec<_>>();
     }
 }
 

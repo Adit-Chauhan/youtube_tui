@@ -14,7 +14,7 @@ use serde_json::Value;
 
 use crate::web::api as YTApi;
 use crate::web::{yt_channels::YTChannel, yt_video::Video};
-use log::{debug, info};
+use log::info;
 
 pub fn get_recent() -> Result<Vec<Video>, Box<dyn Error>> {
     #[rustfmt::skip]
@@ -154,13 +154,14 @@ pub fn load_channels() -> Vec<YTChannel> {
     channels
 }
 
+// Depreceated
 pub fn save_channel_vids() {
     info!("Saving Videos");
     let chans = load_channels();
     info!("Loaded Channels");
     chans
         .par_iter()
-        .map(|c| {
+        .map(|_c| {
             //     c.save_vidoes();
         })
         .collect::<Vec<_>>();

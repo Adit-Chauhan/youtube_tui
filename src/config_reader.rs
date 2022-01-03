@@ -1,17 +1,18 @@
-use std::io::Read;
-
+use log::info;
 use serde::Deserialize;
+use std::env;
+use std::io::Read;
 use toml;
 
 #[derive(Deserialize, Debug)]
 struct Config {
     cookie: String,
-    cachepath: String,
     api_key: String,
     channel_id: String,
-    cache_size_max: usize,
-    video_dir: String,
-    permapath: String,
+    cachepath: Option<String>,
+    cache_size_max: Option<usize>,
+    video_dir: Option<String>,
+    permapath: Option<String>,
 }
 
 fn read_config() -> Config {
@@ -28,14 +29,31 @@ fn string_to_static_str(s: String) -> &'static str {
 
 pub fn set_configs() {
     let a = read_config();
+    let home = env::var("HOME");
     unsafe {
         YT_API_KEY = string_to_static_str(a.api_key);
         YT_COOKIES = string_to_static_str(a.cookie);
         YT_SELF_CHANNEL_NAME = string_to_static_str(a.channel_id);
-        CACHE_PATH = string_to_static_str(a.cachepath);
-        CACHE_MAX_SIZE = a.cache_size_max;
-        CACHE_VIDEO_DIR = string_to_static_str(a.video_dir);
-        PERMA = string_to_static_str(a.permapath);
+        CACHE_PATH = string_to_static_str(a.cachepath.unwrap_or(format!(
+            "{}/.cache/yt",
+            home.as_ref().expect("HOME Variable not set")
+        )));
+        CACHE_MAX_SIZE = a.cache_size_max.unwrap_or(64);
+        CACHE_VIDEO_DIR = string_to_static_str(a.video_dir.unwrap_or(format!(
+            "{}/.local/share/yt/videos",
+            home.as_ref().expect("HOME Variable not set")
+        )));
+        PERMA = string_to_static_str(a.permapath.unwrap_or(format!(
+            "{}/.local/share/yt/",
+            home.as_ref().expect("HOME Variable not set")
+        )));
+        info!("API = {}", YT_API_KEY);
+        info!("COOKIES = {}", YT_COOKIES);
+        info!("CHANNEL = {}", YT_SELF_CHANNEL_NAME);
+        info!("CACHE PATH = {}", CACHE_PATH);
+        info!("CACHE SIZE = {}", CACHE_MAX_SIZE);
+        info!("Video Dir = {}", CACHE_VIDEO_DIR);
+        info!("PERMA = {}", PERMA);
     }
 }
 

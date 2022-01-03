@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use tui::widgets::ListState;
 
 pub struct StatefulList<T> {

@@ -1,7 +1,3 @@
-use std::path::Path;
-
-use crate::web::api as YTApi;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -13,12 +9,6 @@ pub struct Video {
     pub posted_time: String,
     pub channel: String,
     pub channel_url: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct Comment {
-    author: String,
-    comment: String,
 }
 
 impl Video {
@@ -56,12 +46,5 @@ impl Video {
 
     pub fn get_url(self) -> String {
         format!("https://www.youtube.com/watch?v={}", self.id)
-    }
-    pub fn get_thumb_loc(self) -> String {
-        if Path::new(&format!("{}.jpg", self.id)).exists() {
-            format!("{}.jpg", self.id)
-        } else {
-            "loadingPath.pg".to_string()
-        }
     }
 }

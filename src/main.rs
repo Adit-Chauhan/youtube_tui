@@ -12,7 +12,7 @@ use crate::web::utils::{
     get_channels, get_home, save_channel_vids, save_channels_initial, update_channels,
 };
 
-use crate::ui::{App, Contents};
+use crate::ui::{App, Contents, Menu};
 
 use std::error::Error;
 use std::io::{self, Read};
@@ -52,13 +52,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         return Ok(());
     }
-    let res = get_home()?;
-    info!("Downloaded and Parsed Video info");
     let mut asi = async_stdin();
     let stdout = io::stdout().into_raw_mode().expect("Raw IO");
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend).expect("Terminal");
-    let mut app = App::new(Contents::Vid(res));
+    let mut app = App::new_from_menu(Menu::Channels);
+    app.refresh();
     terminal.clear()?;
     'outer: loop {
         terminal
@@ -83,13 +82,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Key::Right => app.on_right(),
                 Key::Char('\t') => {
                     app.ueberzug.clear("a");
-                    terminal.draw(|f| {
-                        let para = Paragraph::new("Loading")
-                            .style(tui::style::Style::default().fg(White))
-                            .alignment(tui::layout::Alignment::Center)
-                            .block(Block::default().borders(Borders::ALL));
-                        f.render_widget(para, f.size());
-                    });
+                    terminal
+                        .draw(|f| {
+                            let para = Paragraph::new("Loading")
+                                .style(tui::style::Style::default().fg(White))
+                                .alignment(tui::layout::Alignment::Center)
+                                .block(Block::default().borders(Borders::ALL));
+                            f.render_widget(para, f.size());
+                        })
+                        .expect("Failed to draw loading");
                     app.on_tab();
                 }
                 Key::Char('\n') => app.on_enter(),

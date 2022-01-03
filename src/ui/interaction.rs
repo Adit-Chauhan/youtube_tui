@@ -1,9 +1,7 @@
 use crate::commands;
 use crate::web::extra::history;
 use crate::web::extra::watch_later;
-use std::panic;
 
-const MENU_COUNT: usize = 4;
 use super::{App, Contents, Menu};
 impl App {
     pub fn on_up(&mut self) {
@@ -25,7 +23,7 @@ impl App {
         match &self.content {
             Contents::Vid(x) => {
                 history::save_history(&x[idx].title, &x[idx].id, &x[idx].channel);
-                commands::play_vid(&x[idx].clone().get_url());
+                commands::play_vid(&x[idx]);
             }
             Contents::Chan(_x) => {
                 self.menu_active = Menu::ChannelVideos;
@@ -66,23 +64,23 @@ impl App {
                 match c {
                     '1' => {
                         history::save_history(&vids[0].title, &vids[0].id, &vids[0].channel_url);
-                        commands::play_vid(&vids[0].clone().get_url())
+                        commands::play_vid(&vids[0])
                     }
                     '2' => {
                         history::save_history(&vids[1].title, &vids[1].id, &vids[1].channel_url);
-                        commands::play_vid(&vids[1].clone().get_url())
+                        commands::play_vid(&vids[1])
                     }
                     '3' => {
                         history::save_history(&vids[2].title, &vids[2].id, &vids[2].channel_url);
-                        commands::play_vid(&vids[2].clone().get_url())
+                        commands::play_vid(&vids[2])
                     }
                     '4' => {
                         history::save_history(&vids[3].title, &vids[3].id, &vids[3].channel_url);
-                        commands::play_vid(&vids[3].clone().get_url())
+                        commands::play_vid(&vids[3])
                     }
                     '5' => {
                         history::save_history(&vids[4].title, &vids[4].id, &vids[4].channel_url);
-                        commands::play_vid(&vids[4].clone().get_url())
+                        commands::play_vid(&vids[4])
                     }
                     _ => {}
                 };

@@ -1,15 +1,13 @@
 use crate::config_reader::*;
 use crate::list::*;
 use crate::util_macro::*;
-use crate::web::extra::history;
+use crate::web::extra::{history, watch_later};
 use crate::web::yt_video::Video;
 use crate::web::*;
 use ueberzug::{Scalers, UeConf, Ueberzug};
 
-use std::fs::File;
-use std::io::{self, BufRead, Write};
+use std::io::Write;
 use std::panic;
-use std::path::Path;
 
 use std::thread;
 use tui::{
@@ -34,11 +32,19 @@ impl App {
             titles: StatefulList::with_items(vid_titles),
             content,
             ueberzug: Ueberzug::new(),
-            menu_titles: vec!["Home", "Recent", "Channels", "History"],
+            menu_titles: vec!["Home", "Recent", "Channels", "History", "Watch Later"],
             menu_active: Menu::Home,
         }
     }
-
+    pub fn new_from_menu(m: Menu) -> App {
+        App {
+            titles: StatefulList::new(),
+            content: Contents::Vid(Vec::new()),
+            ueberzug: Ueberzug::new(),
+            menu_titles: vec!["Home", "Recent", "Channels", "History", "Watch Later"],
+            menu_active: m,
+        }
+    }
     pub fn refresh(&mut self) {
         // Clear images
         self.ueberzug.clear("0");
@@ -80,7 +86,10 @@ impl App {
                 (Contents::Vid(h.0), StatefulList::with_items(h.1))
             }
 
-            Menu::WatchList => todo!(),
+            Menu::WatchList => {
+                let w = watch_later::load_watch();
+                (Contents::Vid(w.0), StatefulList::with_items(w.1))
+            }
         };
         self.content = content;
         self.titles = titles;
@@ -184,9 +193,9 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         Menu::Home => app.draw_vids(bunks[1], f, "Home "),
         Menu::Recent => app.draw_vids(bunks[1], f, "Recents "),
         Menu::Channels => app.draw_channel(bunks[1], f),
-        Menu::History => app.draw_history(bunks[1], f),
+        Menu::History => app.draw_simple(bunks[1], f, "History "),
         Menu::ChannelVideos => app.draw_vids(bunks[1], f, "Channel "),
-        Menu::WatchList => todo!(),
+        Menu::WatchList => app.draw_simple(bunks[1], f, "Watch Later "),
     }
 
     let menu = iter_collect!(app.menu_titles, |t| -> Spans {
@@ -216,11 +225,4 @@ pub fn video_desc(v: &Video) -> String {
         "Title: {}\nView Count: {}\nPosted Time: {}\nChannel: {}",
         v.title, v.view_count, v.posted_time, v.channel
     )
-}
-pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
 }

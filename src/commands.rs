@@ -1,7 +1,10 @@
 use crate::config_reader::CACHE_VIDEO_DIR;
 use crate::util_macro::static_format;
+use crate::web::yt_video::Video;
+use std::path::Path;
 use std::process::{Command, Stdio};
-pub fn play_vid(url: &str) {
+
+fn live_vid(url: &str) {
     Command::new("devour")
         .arg("mpv")
         .arg(url)
@@ -31,4 +34,14 @@ fn string_to_static_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
 }
 
-//pub fn run_vid(vid: &Video) {}
+pub fn play_vid(vid: &Video) {
+    if Path::new(&static_format!("{}/{}.webm", CACHE_VIDEO_DIR, vid.id)).exists() {
+        Command::new("devour")
+            .arg("mpv")
+            .arg(static_format!("{}/{}.webm", CACHE_VIDEO_DIR, vid.id))
+            .output()
+            .expect("failed to play video");
+    } else {
+        live_vid(&vid.clone().get_url());
+    }
+}

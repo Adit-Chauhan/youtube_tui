@@ -41,17 +41,8 @@ macro_rules! static_format {
 	};
 }
 
-macro_rules! tern {
-[$cond:expr => $true:expr ; $false:expr] => {if $cond {
-        $true
-}else{
-    $false
-}
-};}
-
 pub(crate) use iter_collect;
 pub(crate) use json_file;
 pub(crate) use json_travel;
 pub(crate) use static_format;
-pub(crate) use tern;
 pub(crate) use vid_travel;
