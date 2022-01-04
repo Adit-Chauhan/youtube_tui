@@ -139,7 +139,7 @@ impl App {
             y: chunk.y + 1,
             width: Some(chunk.width - 5),
             height: Some(chunk.height - 2),
-            scaler: Some(Scalers::Cover),
+            scaler: Some(Scalers::Distort),
             ..Default::default()
         });
     }
@@ -153,8 +153,8 @@ impl App {
             x: chumk.x + 1,
             y: chumk.y + 1,
             width: Some(chumk.width - 2),
-            height: Some(chumk.height),
-            scaler: Some(Scalers::FitContain),
+            height: Some(chumk.height - 2),
+            scaler: Some(Scalers::Distort),
             ..Default::default()
         });
 

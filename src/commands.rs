@@ -15,6 +15,7 @@ fn live_vid(url: &str) {
 pub fn open_in_br(url: &str) {
     Command::new("firefox")
         .arg(url)
+        .stdout(Stdio::null())
         .spawn()
         .expect("filed to open");
 }

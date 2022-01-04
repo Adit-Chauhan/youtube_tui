@@ -13,9 +13,9 @@ use crate::ui::{App, Menu};
 use crate::web::extra::{cache, history};
 use crate::web::utils::{get_channels, save_channel_vids, save_channels_initial, update_channels};
 
+use log::info;
 use std::error::Error;
 use std::io::{self, Read};
-use std::sync::Mutex;
 use termion::{async_stdin, event::Key, input::TermRead, raw::IntoRawMode};
 use tui::style::Color::White;
 use tui::{
@@ -24,10 +24,6 @@ use tui::{
     Terminal,
 };
 
-use log::info;
-lazy_static::lazy_static! {
-    pub static ref RUNNING: Mutex<usize>  = Mutex::new(0);
-}
 fn main() -> Result<(), Box<dyn Error>> {
     sh();
     env_logger::init();
