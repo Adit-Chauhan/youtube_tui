@@ -88,7 +88,7 @@ impl YTChannel {
             }
             return vids;
         }
-        info!("Grabbing video for {}", self.name);
+        //        info!("Grabbing video for {}", self.name);
         let jsn = YTApi::get_channel_uploads(self.id.to_string(), None).map_err(|_e| {
             error!("Error on grabbing channel uploads for {}", self.name);
             error!("returning empty vec");

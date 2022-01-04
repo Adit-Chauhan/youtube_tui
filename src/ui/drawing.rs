@@ -138,7 +138,7 @@ impl App {
             let chan_vids = &channels[x].load_videos();
             for i in 0..5 {
                 if let Some(x) = chan_vids.get(i) {
-                    paras[i] = make_para(x.title.clone());
+                    paras[i] = make_para(format!("{}: {}", i + 1, x.title.clone()));
                     self.draw_video_thumb(x, &indiv_vid_splits[i][1], &format!("{}", i));
                 }
             }
