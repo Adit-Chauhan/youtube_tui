@@ -34,6 +34,19 @@ pub fn get_channel_uploads(
         Ok(resp)
     }
 }
+
+pub fn get_playlist_videos(id: String, page: Option<String>) -> Result<String, Box<dyn Error>> {
+    if page.is_none() {
+        let url =static_format!("https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId={}&key={}", id ,YT_API_KEY);
+        let resp = reqwest::blocking::get(url)?.text()?;
+        Ok(resp)
+    } else {
+        let url =static_format!("https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=50&pageToken={}&playlistId={}&key={}",page.unwrap(),id ,YT_API_KEY);
+        let resp = reqwest::blocking::get(url)?.text()?;
+        Ok(resp)
+    }
+}
+
 pub(super) fn get_channel_uploads_id(channel_id: String) -> Result<String, Box<dyn Error>> {
     let url = static_format!(
         "https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails&id={}&key={}",
