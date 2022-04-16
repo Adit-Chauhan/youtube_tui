@@ -25,7 +25,7 @@ use tui::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
-    sh();
+    //    sh();
     env_logger::init();
     set_configs();
     let ar: Vec<String> = std::env::args().collect();
@@ -74,6 +74,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Key::Right => app.on_right(),
                 Key::Char('\t') => {
                     app.ueberzug.clear("a");
+                    app.ueberzug.clear("1");
+                    app.ueberzug.clear("2");
+                    app.ueberzug.clear("3");
+                    app.ueberzug.clear("4");
+                    app.ueberzug.clear("0");
                     terminal.draw(|f| {
                         let para = Paragraph::new("Loading")
                             .style(tui::style::Style::default().fg(White))
